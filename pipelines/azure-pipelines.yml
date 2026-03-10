@@ -1,0 +1,27 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+- task: AWSCLI@1
+  inputs:
+    awsCredentials: 'aws-oidc-federation'
+    regionName: 'us-east-1'
+    command: 'sts'
+    arguments: 'get-caller-identity'
+
+- script: |
+    curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+    sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+    sudo apt-get update
+    sudo apt-get install terraform
+  displayName: Install Terraform
+
+- script: |
+    cd infra
+    terraform init
+    terraform plan
+  displayName: Terraform Plan
