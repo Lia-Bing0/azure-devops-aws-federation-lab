@@ -30,14 +30,14 @@ Once approved, rerun the pipeline.
 
 ## Core Technologies
 
-Azure DevOps
-Amazon Web Services (AWS)
-AWS IAM / STS
-Amazon EC2
-AWS Auto Scaling
-Terraform (Infrastructure-as-Code)
-Checkov (IaC security scanning)
-
+- Azure DevOps
+- Amazon Web Services (AWS)
+- AWS IAM / STS
+- Amazon EC2
+- AWS Auto Scaling
+- Terraform (Infrastructure-as-Code)
+- Checkov (IaC security scanning)
+  
 ## Security Concepts Demonstrated
 
 OIDC workload identity federation
@@ -69,6 +69,45 @@ Amazon EC2 instance
 Auto Scaling group
 
 Associated IAM roles and security groups
+
+## Secure CI/CD Identity Federation Flow
+
+Developer
+   │
+   │  git push
+   ▼
+Azure DevOps Pipeline
+   │
+   │ Generate OIDC Token
+   ▼
+Azure DevOps OIDC Provider
+   │
+   │ Present identity token
+   ▼
+AWS IAM OIDC Identity Provider
+   │
+   │ Validate trust policy
+   ▼
+AWS Security Token Service (STS)
+   │
+   │ AssumeRoleWithWebIdentity
+   │ Issue temporary credentials
+   ▼
+Terraform Execution
+   │
+   │ Deploy infrastructure
+   ▼
+AWS Resources
+   ├─ EC2 Instance
+   ├─ Security Group
+   └─ Auto Scaling Group
+
+The pipeline authenticates to AWS using OpenID Connect (OIDC) federation. 
+Azure DevOps generates an identity token which is validated by the AWS IAM 
+OIDC provider. AWS Security Token Service (STS) then issues temporary 
+credentials using `AssumeRoleWithWebIdentity`. Terraform uses these 
+short-lived credentials to deploy infrastructure without storing long-lived 
+AWS access keys in the CI/CD pipeline.
 
 ## Repository Structure
 
@@ -167,3 +206,17 @@ CI/CD identity federation
 Secure infrastructure automation
 Infrastructure-as-Code security scanning
 Cloud IAM design patterns
+
+## Pipeline Execution
+
+The Azure DevOps pipeline validates secure AWS federation and infrastructure provisioning.
+
+Pipeline stages:
+
+- Verify AWS identity using STS
+- Install Terraform runtime
+- Initialize Terraform configuration
+- Generate Terraform execution plan
+- Successful Pipeline Run
+- AWS Identity Verification via STS
+- Terraform Infrastructure Plan
