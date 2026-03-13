@@ -10,8 +10,8 @@ steps:
   inputs:
     awsCredentials: 'aws-oidc-federation'
     regionName: 'us-east-1'
-    command: 'sts'
-    arguments: 'get-caller-identity'
+    awsCommand: 'sts'
+    awsSubCommand: 'get-caller-identity'
 
 - script: |
     curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -

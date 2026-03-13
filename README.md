@@ -8,7 +8,27 @@ Security controls are embedded directly in the pipeline through Checkov infrastr
 
 The lab showcases secure CI/CD identity federation, infrastructure automation, and IaC security enforcement across Azure and AWS.
 
-Core Technologies
+## Prerequisites
+
+Before running the Azure DevOps pipeline, ensure the following requirements are met.
+
+### Azure DevOps Hosted Agent Requirement
+
+New Azure DevOps organizations running **private projects** may not initially have hosted pipeline parallelism enabled.
+
+If the pipeline fails with the message:
+
+No hosted parallelism has been purchased or granted
+
+request free hosted parallelism using the Microsoft request form:
+
+    https://aka.ms/azpipelines-parallelism-request
+
+Select **Private projects** when submitting the request.
+
+Once approved, rerun the pipeline.
+
+## Core Technologies
 
 Azure DevOps
 Amazon Web Services (AWS)
@@ -18,7 +38,7 @@ AWS Auto Scaling
 Terraform (Infrastructure-as-Code)
 Checkov (IaC security scanning)
 
-Security Concepts Demonstrated
+## Security Concepts Demonstrated
 
 OIDC workload identity federation
 Short-lived cloud credentials (STS)
@@ -26,7 +46,7 @@ Least-privilege IAM role design
 Shift-left infrastructure security scanning
 Multi-cloud CI/CD infrastructure delivery
 
-High Level Architecture
+## High Level Architecture
 
 Developer → Git push
 
@@ -50,7 +70,8 @@ Auto Scaling group
 
 Associated IAM roles and security groups
 
-Repository Structure
+## Repository Structure
+
 azure-devops-aws-federation-lab
 │
 ├── infra
@@ -72,7 +93,9 @@ azure-devops-aws-federation-lab
 │   └── setup-guide.md
 │
 └── README.md
-Implementation Phases
+
+## Implementation Phases
+
 Phase 1 — Secure AWS Federation
 
 Goal: Allow Azure DevOps pipelines to securely authenticate to AWS.
