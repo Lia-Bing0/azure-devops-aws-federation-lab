@@ -220,3 +220,16 @@ Pipeline stages:
 - Successful Pipeline Run
 - AWS Identity Verification via STS
 - Terraform Infrastructure Plan
+
+## DevSecOps Security Validation
+
+The pipeline enforces infrastructure security scanning before deployment.
+
+Example workflow:
+
+- Terraform configuration introduced an insecure security group allowing SSH from 0.0.0.0/0
+- Checkov detected the vulnerability and failed the pipeline
+- Terraform configuration was remediated by restricting SSH access and enabling additional EC2 security controls
+- Pipeline was rerun and security validation passed
+  
+This demonstrates shift-left security enforcement within CI/CD pipelines.
