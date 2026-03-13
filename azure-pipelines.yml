@@ -21,8 +21,13 @@ steps:
     terraform version
   displayName: Install Terraform
 
-- script: |
-    cd infra
-    terraform init
-    terraform plan
+- task: AWSShellScript@1
   displayName: Terraform Init and Plan
+  inputs:
+    awsCredentials: 'aws-oidc-federation'
+    regionName: 'us-east-1'
+    scriptType: 'inline'
+    inlineScript: |
+      cd infra
+      terraform init
+      terraform plan
