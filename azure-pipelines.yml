@@ -21,6 +21,16 @@ steps:
     terraform version
   displayName: Install Terraform
 
+- script: |
+    python3 -m pip install --upgrade pip
+    pip install checkov
+    checkov --version
+  displayName: Install Checkov
+
+- script: |
+    checkov -d infra
+  displayName: Run Checkov Security Scan
+
 - task: AWSShellScript@1
   displayName: Terraform Init and Plan
   inputs:
