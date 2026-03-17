@@ -1,76 +1,36 @@
-# Azure DevOps → AWS Infrastructure Federation Lab
+# Azure DevOps to AWS Federation DevSecOps Lab
 
 ## Overview
 
-This project demonstrates a multi-cloud DevSecOps pipeline where Azure DevOps securely deploys AWS infrastructure using OIDC federation. Instead of storing static AWS credentials in CI/CD variables, the pipeline authenticates using short-lived AWS STS tokens through an IAM role trust relationship.
+This repository demonstrates a professional DevSecOps workflow where Azure DevOps deploys AWS infrastructure using OIDC federation and temporary AWS STS credentials, with Terraform automation and Checkov security validation built into CI/CD.
 
-Security controls are embedded directly in the pipeline through Checkov infrastructure-as-code scanning, ensuring insecure infrastructure configurations are detected and remediated before deployment.
+The pipeline intentionally includes a fail-then-fix validation path:
 
-The lab showcases secure CI/CD identity federation, infrastructure automation, and IaC security enforcement across Azure and AWS.
+- Insecure Terraform configuration causes security scan failure.
+- Checkov identifies policy violations before deployment.
+- Terraform is remediated to meet security controls.
+- Pipeline reruns and passes secure deployment gates.
 
-## Prerequisites
+## Architecture Overview
 
-Before running the Azure DevOps pipeline, ensure the following requirements are met.
+End-to-end flow:
 
-### Azure DevOps Hosted Agent Requirement
+1. Developer pushes changes to repository.
+2. Azure DevOps pipeline starts and requests an OIDC token.
+3. AWS IAM OIDC provider validates token issuer and trust policy.
+4. AWS STS issues temporary credentials via `AssumeRoleWithWebIdentity`.
+5. Terraform initializes and plans infrastructure changes.
+6. Checkov scans Terraform for security misconfigurations.
+7. Deployment proceeds only when security validation passes.
 
-New Azure DevOps organizations running **private projects** may not initially have hosted pipeline parallelism enabled.
+Deployed AWS resources include:
 
-If the pipeline fails with the message:
+- EC2 instance
+- Security group
+- Launch template and Auto Scaling configuration
+- IAM role association for compute identity
 
-No hosted parallelism has been purchased or granted
-
-request free hosted parallelism using the Microsoft request form:
-
-    https://aka.ms/azpipelines-parallelism-request
-
-Select **Private projects** when submitting the request.
-
-Once approved, rerun the pipeline.
-
-## Core Technologies
-
-- Azure DevOps
-- Amazon Web Services (AWS)
-- AWS IAM / STS
-- Amazon EC2
-- AWS Auto Scaling
-- Terraform (Infrastructure-as-Code)
-- Checkov (IaC security scanning)
-  
-## Security Concepts Demonstrated
-
-OIDC workload identity federation
-Short-lived cloud credentials (STS)
-Least-privilege IAM role design
-Shift-left infrastructure security scanning
-Multi-cloud CI/CD infrastructure delivery
-
-## High Level Architecture
-
-Developer → Git push
-
-Azure DevOps Pipeline executes:
-
-Terraform validation
-
-Checkov security scan
-
-OIDC authentication with AWS
-
-AWS STS AssumeRoleWithWebIdentity
-
-Terraform deployment of infrastructure
-
-Deployed resources:
-
-Amazon EC2 instance
-
-Auto Scaling group
-
-Associated IAM roles and security groups
-
-## Secure CI/CD Identity Federation Flow
+### Secure CI/CD Identity Federation Flow
 
 Developer
    │
@@ -95,141 +55,121 @@ AWS Security Token Service (STS)
    ▼
 Terraform Execution
    │
-   │ Deploy infrastructure
+   │ Run Checkov Security Scan
+   │
    ▼
-AWS Resources
+AWS Infrastructure Deployment
    ├─ EC2 Instance
    ├─ Security Group
    └─ Auto Scaling Group
 
-The pipeline authenticates to AWS using OpenID Connect (OIDC) federation. 
-Azure DevOps generates an identity token which is validated by the AWS IAM 
-OIDC provider. AWS Security Token Service (STS) then issues temporary 
-credentials using `AssumeRoleWithWebIdentity`. Terraform uses these 
-short-lived credentials to deploy infrastructure without storing long-lived 
-AWS access keys in the CI/CD pipeline.
+Azure DevOps authenticates to AWS using OpenID Connect (OIDC) federation.  
+The pipeline generates an OIDC identity token that is validated by the AWS IAM OIDC identity provider.
+
+AWS Security Token Service (STS) then issues temporary credentials using `AssumeRoleWithWebIdentity`.  
+Terraform uses these short-lived credentials to provision infrastructure without storing long-lived AWS access keys in the CI/CD pipeline.
+
+## Technology Stack
+
+- Azure DevOps Pipelines
+- AWS IAM and AWS STS
+- AWS EC2 and Auto Scaling
+- Terraform
+- Checkov
+
+## Security Concepts Demonstrated
+
+- OIDC workload identity federation
+- Short-lived cloud credentials (no static access keys in pipeline)
+- IAM trust policy validation for federated principals
+- Shift-left IaC security scanning
+- DevSecOps fail-fast remediation workflow
+
+## DevSecOps Security Validation Workflow
+
+This project validates security as a required deployment gate:
+
+1. Introduce insecure Terraform (for example, SSH open to `0.0.0.0/0`, missing encryption, or weak metadata configuration).
+2. Run pipeline and observe Checkov security failure.
+3. Review findings and remediate Terraform configuration.
+4. Rerun pipeline and confirm scan passes.
+5. Confirm secure infrastructure deployment in AWS.
+
+Primary remediation patterns used:
+
+- Restrict security group ingress
+- Enforce encrypted root volume
+- Require IMDSv2
+- Enable EC2 monitoring
+
+## Pipeline Execution Evidence (CI/CD Security Gates)
+
+- Checkov failure example: `docs/images/02-checkov-scan-failure.png`
+- Successful pipeline run: `docs/images/03-devsecops-pipeline-success.png`
+- Terraform plan success output: `docs/images/04-terraform-plan-success.png`
+
+Screenshot timing guidance:
+
+- Capture `02-checkov-scan-failure.png` immediately after the security stage fails on insecure Terraform.
+- Capture `04-terraform-plan-success.png` from the Terraform planning stage after remediation.
+- Capture `03-devsecops-pipeline-success.png` from the final successful pipeline summary view.
+
+## Deployment Results
+
+Live deployment evidence is documented in `docs/deployment-results.md`.
+
+Expected evidence set:
+
+- Running EC2 instance
+- Restricted security group configuration
+- IAM role attached to EC2 instance
+- Terraform plan output from CI/CD execution
+
+## Prerequisites
+
+- Azure DevOps project with pipeline permissions
+- AWS account with IAM role and OIDC provider configured
+- Terraform and Checkov available in pipeline runtime
+- Hosted Azure DevOps parallelism enabled for private projects
+
+If you encounter hosted parallelism limitations, see `docs/troubleshooting.md`.
 
 ## Repository Structure
 
-azure-devops-aws-federation-lab
-│
-├── infra
-│   ├── main.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   └── autoscaling.tf
-│
-├── pipelines
-│   └── azure-pipelines.yml
-│
-├── security
-│   ├── checkov.yaml
-│   └── scan-results.md
-│
-├── docs
-│   ├── architecture-diagram.png
-│   ├── federation-flow.md
-│   └── setup-guide.md
-│
-└── README.md
+```text
+azure-devops-aws-federation-lab/
+|-- azure-pipelines.yml
+|-- infra/
+|   |-- autoscaling.tf
+|   |-- ec2.tf
+|   |-- main.tf
+|   |-- outputs.tf
+|   `-- variables.tf
+|-- pipelines/
+|-- security/
+|   |-- checkov.yaml
+|   `-- scan-results.md
+|-- docs/
+|   |-- README.md
+|   |-- deployment-results.md
+|   |-- federation-flow.md
+|   |-- setup-guide.md
+|   |-- troubleshooting.md
+|   `-- images/
+|       `-- archive/
+`-- README.md
+```
 
-## Implementation Phases
+## Learning Outcomes
 
-Phase 1 — Secure AWS Federation
+This lab demonstrates practical capability in:
 
-Goal: Allow Azure DevOps pipelines to securely authenticate to AWS.
+- Designing secure multi-cloud CI/CD federation
+- Eliminating long-lived cloud secrets from pipelines
+- Enforcing IaC policy checks before infrastructure changes
+- Debugging and remediating cloud security misconfigurations
+- Presenting verifiable deployment and security evidence for audit and portfolio use
 
-Steps:
+## Documentation
 
-Create an AWS IAM OIDC identity provider
-Create an IAM role with a trust policy allowing Azure DevOps to assume the role
-Configure Azure DevOps pipeline to authenticate using OIDC
-Use AWS STS to generate temporary credentials
-
-Security outcome:
-
-No long-lived AWS access keys stored in CI/CD.
-
-Phase 2 — Infrastructure Deployment
-
-Goal: Automate AWS infrastructure provisioning.
-
-Infrastructure deployed:
-
-EC2 instance
-Security group
-Launch template
-Auto Scaling group
-
-Deployment executed via Terraform within the Azure DevOps pipeline.
-
-Phase 3 — IaC Security Enforcement
-
-Goal: Integrate shift-left security scanning.
-
-Pipeline additions:
-
-Checkov scan of Terraform code
-Fail pipeline if critical security issues detected
-Remediate misconfigurations and rerun pipeline
-
-Examples of security checks:
-
-Unrestricted security group ingress
-Unencrypted resources
-Publicly exposed instances
-
-Phase 4 — DevSecOps Hardening
-
-Optional security enhancements:
-
-Restrict IAM role permissions
-Add Terraform remote state storage
-Add approval gates before deployment
-Add logging and monitoring
-
-Validation Scenarios
-
-Security validation will demonstrate:
-
-Checkov failing insecure Terraform configuration
-Pipeline blocking deployment
-Remediation of IaC vulnerabilities
-Successful redeployment after fixes
-
-Learning Outcomes
-
-This project demonstrates practical skills in:
-
-Multi-cloud DevSecOps engineering
-CI/CD identity federation
-Secure infrastructure automation
-Infrastructure-as-Code security scanning
-Cloud IAM design patterns
-
-## Pipeline Execution
-
-The Azure DevOps pipeline validates secure AWS federation and infrastructure provisioning.
-
-Pipeline stages:
-
-- Verify AWS identity using STS
-- Install Terraform runtime
-- Initialize Terraform configuration
-- Generate Terraform execution plan
-- Successful Pipeline Run
-- AWS Identity Verification via STS
-- Terraform Infrastructure Plan
-
-## DevSecOps Security Validation
-
-The pipeline enforces infrastructure security scanning before deployment.
-
-Example workflow:
-
-- Terraform configuration introduced an insecure security group allowing SSH from 0.0.0.0/0
-- Checkov detected the vulnerability and failed the pipeline
-- Terraform configuration was remediated by restricting SSH access and enabling additional EC2 security controls
-- Pipeline was rerun and security validation passed
-  
-This demonstrates shift-left security enforcement within CI/CD pipelines.
+Detailed guides and evidence are indexed in `docs/README.md`.
