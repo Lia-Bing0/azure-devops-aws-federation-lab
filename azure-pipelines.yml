@@ -41,3 +41,14 @@ steps:
       cd infra
       terraform init
       terraform plan
+
+- task: AWSShellScript@1
+  displayName: Terraform Apply
+  inputs:
+    awsCredentials: 'aws-oidc-federation'
+    regionName: 'us-east-1'
+    scriptType: 'inline'
+    inlineScript: |
+      cd infra
+      terraform init
+      terraform apply -auto-approve
