@@ -162,7 +162,7 @@ This step should run inside the AWS-authenticated pipeline task so that the OIDC
 Screenshot placeholders:
 
 - `docs/images/04-terraform-plan-success.png`
-- `docs/images/05-terraform-apply-success.png`
+- `docs/images/10-terraform-apply-success.png`
 
 ---
 
@@ -177,9 +177,9 @@ After a successful `terraform apply`, verify the following in the AWS Console:
 
 Screenshot placeholders:
 
-- `docs/images/06-aws-ec2-instance-running.png`
-- `docs/images/07-aws-security-group-restricted.png`
-- `docs/images/08-aws-ec2-iam-role.png`
+- `docs/images/08-aws-ec2-instance-running.png`
+- `docs/images/09-aws-security-group-restricted.png`
+- `docs/images/07-aws-ec2-iam-role.png`
 
 ---
 
