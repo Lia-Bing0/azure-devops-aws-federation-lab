@@ -32,42 +32,45 @@ Deployed AWS resources include:
 
 ### Secure CI/CD Identity Federation Flow
 
+The following diagram illustrates the identity federation and deployment workflow:
+
+```
 Developer
-   │
-   │  git push
-   ▼
+  | 
+  | git push
+  ▼
 Azure DevOps Pipeline
-   │
-   │ Generate OIDC Token
-   ▼
+  |
+  | Generate OIDC Token
+  ▼
 Azure DevOps OIDC Provider
-   │
-   │ Present identity token
-   ▼
+  |
+  | Present identity token
+  ▼
 AWS IAM OIDC Identity Provider
-   │
-   │ Validate trust policy
-   ▼
+  |
+  | Validate trust policy
+  ▼
 AWS Security Token Service (STS)
-   │
-   │ AssumeRoleWithWebIdentity
-   │ Issue temporary credentials
-   ▼
+  |
+  | AssumeRoleWithWebIdentity
+  | Issue temporary credentials
+  ▼
 Terraform Execution
-   │
-   │ Run Checkov Security Scan
-   │
-   ▼
+  |
+  | Run Checkov Security Scan
+  ▼
 AWS Infrastructure Deployment
-   ├─ EC2 Instance
-   ├─ Security Group
-   └─ Auto Scaling Group
+  ├── EC2 Instance
+  ├── Security Group
+  └── Auto Scaling Group
+```
 
 Azure DevOps authenticates to AWS using OpenID Connect (OIDC) federation.  
 The pipeline generates an OIDC identity token that is validated by the AWS IAM OIDC identity provider.
 
 AWS Security Token Service (STS) then issues temporary credentials using `AssumeRoleWithWebIdentity`.  
-Terraform uses these short-lived credentials to provision infrastructure without storing long-lived AWS access keys in the CI/CD pipeline.
+Terraform uses these short-lived credentials to provision infrastructure without exposing long-lived AWS access keys in the CI/CD pipeline.
 
 ## Technology Stack
 
