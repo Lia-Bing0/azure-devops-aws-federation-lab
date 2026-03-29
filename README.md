@@ -146,16 +146,11 @@ Security misconfigurations detected and blocked prior to deployment.
 ![STS Verification](docs/images/01-aws-sts-identity-verification.png)
 Azure DevOps successfully assumes AWS role via OIDC federation.
 
-### Successful Deployment via CI/CD (EC2 Running)
-
-![EC2 Running](docs/images/08-aws-ec2-instance-running.png)
-Infrastructure deployed after security validation passes.
-
 ## Deployment Results
 
 Live deployment evidence is documented in `docs/deployment-results.md`.
 
-Expected evidence set:
+Deployment verification includes:
 
 - Running EC2 instance
 - Restricted security group configuration
@@ -190,7 +185,6 @@ azure-devops-aws-federation-lab/
 |   |-- main.tf
 |   |-- outputs.tf
 |   `-- variables.tf
-|-- pipelines/
 |-- security/
 |   |-- checkov.yaml
 |   `-- scan-results.md
