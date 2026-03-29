@@ -2,3 +2,5 @@ docs/images/archive/
 docs/notes/
 notes/
 archive/
+terraform.tfstate
+terraform.tfstate.*
