@@ -85,6 +85,33 @@ Terraform uses these short-lived credentials to provision infrastructure without
 - Shift-left IaC security scanning
 - DevSecOps fail-fast remediation workflow
 
+## IAM Least-Privilege Debugging (Real Deployment Iteration)
+
+During initial deployment, Terraform apply failed due to insufficient IAM permissions on the federated OIDC role.
+
+Example failure:
+
+- ec2:CreateSecurityGroup → UnauthorizedOperation  
+- iam:CreateRole → AccessDenied  
+
+Instead of granting broad permissions, the IAM policy was incrementally refined using least-privilege principles.
+
+Additional permission gaps discovered during deployment:
+
+- iam:ListRolePolicies (required for role inspection)
+- ec2:MonitorInstances (required for EC2 monitoring configuration)
+
+This iterative approach ensured that:
+
+- Only required actions were granted
+- Over-permissioning (e.g., AdministratorAccess) was avoided
+- The pipeline remained secure while enabling successful deployment
+
+Final result:
+Terraform apply completed successfully with a minimal, explicitly defined IAM policy.
+
+![Terraform Apply Permission Failure](docs/images/26-terraform-apply-permission-denied.png)
+
 ## DevSecOps Security Validation Workflow
 
 This project validates security as a required deployment gate:
@@ -124,6 +151,8 @@ Expected evidence set:
 - Restricted security group configuration
 - IAM role attached to EC2 instance
 - Terraform plan output from CI/CD execution
+
+Final deployment includes a successfully provisioned EC2 instance via federated OIDC authentication, validated through Terraform apply execution and AWS console verification.
 
 ## Prerequisites
 
