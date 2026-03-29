@@ -3,9 +3,9 @@ trigger:
     include:
       - main
   paths:
-    exclude:
-      - docs/**
-      - '**/*.md'
+    include:
+      - infra/**
+      - azure-pipelines.yml
 
 pool:
   vmImage: ubuntu-latest
