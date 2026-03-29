@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository demonstrates a professional DevSecOps workflow where Azure DevOps deploys AWS infrastructure using OIDC federation and temporary AWS STS credentials, with Terraform automation and Checkov security validation built into CI/CD.
+This project demonstrates secure multi-cloud CI/CD using Azure DevOps and AWS, eliminating static credentials through OIDC federation and enforcing infrastructure security via Checkov.
 
 The pipeline intentionally includes a fail-then-fix validation path:
 
@@ -115,6 +115,8 @@ Terraform apply completed successfully with a minimal, explicitly defined IAM po
 
 ![Terraform Apply Permission Failure](docs/images/06-terraform-apply-permission-denied.png)
 
+![Terraform Apply Success](docs/images/10-terraform-apply-success.png)
+
 ## DevSecOps Security Validation Workflow
 
 This project validates security as a required deployment gate:
@@ -132,17 +134,22 @@ Primary remediation patterns used:
 - Require IMDSv2
 - Enable EC2 monitoring
 
-## Pipeline Execution Evidence (CI/CD Security Gates)
+## Pipeline Security Validation (Fail → Fix → Pass)
 
-- Checkov failure example: `docs/images/02-checkov-scan-failure.png`
-- Successful pipeline run: `docs/images/03-devsecops-pipeline-success.png`
-- Terraform plan success output: `docs/images/04-terraform-plan-success.png`
+### Checkov Failure
 
-Screenshot timing guidance:
+![Checkov Failure](docs/images/02-checkov-scan-failure.png)
+Security misconfigurations detected and blocked prior to deployment.
 
-- Capture `02-checkov-scan-failure.png` immediately after the security stage fails on insecure Terraform.
-- Capture `04-terraform-plan-success.png` from the Terraform planning stage after remediation.
-- Capture `03-devsecops-pipeline-success.png` from the final successful pipeline summary view.
+### STS Identity Verification
+
+![STS Verification](docs/images/01-aws-sts-identity-verification.png)
+Azure DevOps successfully assumes AWS role via OIDC federation.
+
+### Successful Deployment via CI/CD (EC2 Running)
+
+![EC2 Running](docs/images/08-aws-ec2-instance-running.png)
+Infrastructure deployed after security validation passes.
 
 ## Deployment Results
 
@@ -156,6 +163,12 @@ Expected evidence set:
 - Terraform plan output from CI/CD execution
 
 Final deployment includes a successfully provisioned EC2 instance via federated OIDC authentication, validated through Terraform apply execution and AWS console verification.
+
+### Deployed Infrastructure (Post-Deployment Verification)
+
+![EC2 Running](docs/images/08-aws-ec2-instance-running.png)
+
+![Security Group Restricted](docs/images/09-aws-security-group-restricted.png)
 
 ## Prerequisites
 
