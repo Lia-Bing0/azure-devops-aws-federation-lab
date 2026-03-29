@@ -3,4 +3,6 @@ docs/notes/
 notes/
 archive/
 terraform.tfstate
-terraform.tfstate.*
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
