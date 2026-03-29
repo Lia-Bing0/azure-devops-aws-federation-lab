@@ -113,7 +113,7 @@ This iterative approach ensured that:
 Final result:
 Terraform apply completed successfully with a minimal, explicitly defined IAM policy.
 
-![Terraform Apply Permission Failure](docs/images/26-terraform-apply-permission-denied.png)
+![Terraform Apply Permission Failure](docs/images/06-terraform-apply-permission-denied.png)
 
 ## DevSecOps Security Validation Workflow
 
